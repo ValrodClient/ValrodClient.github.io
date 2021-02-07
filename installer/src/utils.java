@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Desktop;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -25,16 +26,18 @@ public class utils {
 	static String discordLink = "https://discord.gg/JWKFwgxR4p";
 	static String channelLink = "https://www.youtube.com/channel/UCRqTYd6ozEp91KZxyEFLKrw?sub_confirmation=1";
 
+	static boolean error = false;
+	
 	static void downloadJar() {
 		GUI.lbl.setText("Downloading JAR");
 		try(
 				ReadableByteChannel in = Channels.newChannel(new URL(serverJarPath).openStream());
 				FileChannel out = new FileOutputStream(clientJarPath).getChannel() ) {
 			out.transferFrom(in, 0, Long.MAX_VALUE);
+			GUI.lbl.setText("Downloaded JAR");
 		} catch(Exception m) {
 			setErrorMessage(m);
 		}
-		GUI.lbl.setText("Downloaded JAR");
 	}
 
 	static void downloadJson() {
@@ -46,7 +49,7 @@ public class utils {
 		} catch(Exception m) {
 			setErrorMessage(m);
 		}
-		GUI.lbl.setText("Downloaded JSON");
+		if(!error){GUI.lbl.setText("Downloaded JSON");}
 	}
 
 	static void openDiscord() {
@@ -55,7 +58,7 @@ public class utils {
 				Desktop.getDesktop().browse(new URI(discordLink));
 			} catch (IOException e) {setErrorMessage(e);} catch (URISyntaxException e) {setErrorMessage(e);};
 		}
-		GUI.lbl.setText("Done!");
+		if(!error){GUI.lbl.setText("Done!");}
 	}
 	
 	static void openChannel() {
@@ -72,12 +75,23 @@ public class utils {
 		GUI.lbl.setText("ERROR");
 		GUI.lbl.setForeground(new Color(189, 0, 0));
 		GUI.statue.setText(String.valueOf(message));
+		error = true;
+	}
+	
+	static void createDir() {
+		File theDir = new File(clientFolder);
+		if (!theDir.exists()){
+		    theDir.mkdirs();
+		}
 	}
 	
 	static void update() {
+		createDir();
 		downloadJar();
+		if(!error){
 		downloadJson();
 		openDiscord();
 		openChannel();
+		}
 	}
 }
